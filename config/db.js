@@ -6,8 +6,11 @@ exports.connectDB = async function () {
 
   mongoose.set("strictQuery", false);
 
-  mongoose
-    .connect(URI, connectionParams)
-    .then(() => console.info("Connection established"))
-    .catch((err) => console.error("Error" + err.message));
+  try {
+    await mongoose.connect(URI, connectionParams);
+    console.info("Connection established");
+  } catch (err) {
+    console.error("Error: " + err.message);
+    process.exit(1);
+  }
 };
