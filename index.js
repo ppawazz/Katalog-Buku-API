@@ -13,11 +13,6 @@ const {
   updateBook,
   deleteBook,
 } = require("./controller/BookController");
-const {
-  userRegister,
-  userLogin,
-  getAllUser,
-} = require("./controller/UserController");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -36,10 +31,6 @@ app.post("/books/addbooks", postBook);
 app.get("/books/:id", getBookById);
 app.put("/books/:id", updateBook);
 app.delete("/books/:id", deleteBook);
-
-app.post("/user/register", userRegister);
-app.post("/user/login", userLogin);
-app.get("/user/getAllUser", getAllUser);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
