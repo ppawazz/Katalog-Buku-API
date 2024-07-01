@@ -5,6 +5,7 @@ const express = require("express");
 const { connectDB } = require("./config/db");
 const app = express();
 const port = process.env.PORT;
+const Book = require("./models/BookModels");
 const {
   getAllBook,
   postBook,
