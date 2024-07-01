@@ -12,7 +12,7 @@ const getAllBook = async (req, res) => {
     res.status(200).json({
       success: true,
       payload: books,
-      message: "successfully getting book",
+      message: "Successfully getting book",
     }); // Send the books as JSON response
   } catch (error) {
     res.status(500).json({ message: error.message }); // Handle errors
@@ -42,7 +42,7 @@ const postBook = async (req, res) => {
       res.status(200).json({
         success: true,
         payload: savedBook,
-        message: "succesfully added book",
+        message: "Successfully added book",
       }); // Send the saved book as JSON response with status code 201 (Created)
     } catch (error) {
       res.status(400).json({ message: error.message }); // Handle validation errors
@@ -73,26 +73,39 @@ const getBookById = async (req, res) => {
 
 // Controller untuk mengupdate buku
 const updateBook = async (req, res) => {
-  const { id } = req.params;
-  const updates = req.body;
-
-  try {
-    const updatedBook = await Book.findByIdAndUpdate(id, updates, {
-      new: true,
-    });
-
-    if (!updatedBook) {
-      return res.status(404).json({ message: "Book not found" });
+  upload.single("cover")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
     }
 
-    res.status(200).json({
-      success: true,
-      payload: updatedBook,
-      message: "Successfully updated book",
-    });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
+    const { id } = req.params;
+    const { title, author, publisher, pages } = req.body;
+    let cover = req.body.cover; // Gunakan cover dari body jika tidak ada file baru
+
+    if (req.file) {
+      cover = req.file.path; // URL dari Cloudinary
+    }
+
+    try {
+      const updatedBook = await Book.findByIdAndUpdate(
+        id,
+        { title, author, publisher, pages, cover },
+        { new: true }
+      );
+
+      if (!updatedBook) {
+        return res.status(404).json({ message: "Book not found" });
+      }
+
+      res.status(200).json({
+        success: true,
+        payload: updatedBook,
+        message: "Successfully updated book",
+      });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  });
 };
 
 // Controller untuk menghapus buku
