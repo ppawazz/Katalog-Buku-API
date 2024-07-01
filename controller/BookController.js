@@ -1,39 +1,59 @@
 const Book = require("../models/BookModels");
+const multer = require("multer");
+const path = require("path");
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}_${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const getAllBook = async (req, res) => {
   try {
-    const books = await Book.find(); // Fetch all books from the database
+    const books = await Book.find();
     res.status(200).json({
       success: true,
       payload: books,
       message: "successfully getting book",
-    }); // Send the books as JSON response
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message }); // Handle errors
+    res.status(500).json({ message: error.message });
   }
 };
 
 const postBook = async (req, res) => {
-  const { cover, title, author, publisher, pages } = req.body;
+  upload.single("cover")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
 
-  try {
-    const newBook = new Book({
-      cover,
-      title,
-      author,
-      publisher,
-      pages,
-    });
+    const { title, author, publisher, pages } = req.body;
+    const cover = req.file.path;
 
-    const savedBook = await newBook.save(); // Save the new book to the database
-    res.status(200).json({
-      success: true,
-      payload: savedBook,
-      message: "succesfully added book",
-    }); // Send the saved book as JSON response with status code 201 (Created)
-  } catch (error) {
-    res.status(400).json({ message: error.message }); // Handle validation errors
-  }
+    try {
+      const newBook = new Book({
+        cover,
+        title,
+        author,
+        publisher,
+        pages,
+      });
+
+      const savedBook = await newBook.save();
+      res.status(200).json({
+        success: true,
+        payload: savedBook,
+        message: "succesfully added book",
+      });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  });
 };
 
 const getBookById = async (req, res) => {
@@ -83,7 +103,7 @@ const deleteBook = async (req, res) => {
   const bookId = req.params.id;
 
   try {
-    const deletedBook = await Book.findByIdAndDelete(bookId); // Find and delete book by ID in the database
+    const deletedBook = await Book.findByIdAndDelete(bookId);
     if (!deletedBook) {
       return res.status(404).json({ message: "Book not found" });
     }
@@ -91,9 +111,9 @@ const deleteBook = async (req, res) => {
       message: "Book deleted successfully",
       success: true,
       payload: null,
-    }); // Send success message
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message }); // Handle errors
+    res.status(500).json({ message: error.message });
   }
 };
 

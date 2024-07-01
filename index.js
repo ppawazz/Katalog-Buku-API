@@ -5,26 +5,18 @@ const express = require("express");
 const { connectDB } = require("./config/db");
 const app = express();
 const port = process.env.PORT;
-const Book = require("./models/BookModels");
 const {
   getAllBook,
   postBook,
   getBookById,
   updateBook,
   deleteBook,
-} = require("./controller/BookController");
+} = require("./controllers/BookController");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 connectDB();
-
-app.get(
-  "/testing",
-  (test = (req, res) => {
-    res.send("test berhasil");
-  })
-);
 
 app.get("/books", getAllBook);
 app.post("/books/addbooks", postBook);
