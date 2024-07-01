@@ -11,7 +11,7 @@ const {
   getBookById,
   updateBook,
   deleteBook,
-} = require("./controllers/BookController");
+} = require("./controller/BookController");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
