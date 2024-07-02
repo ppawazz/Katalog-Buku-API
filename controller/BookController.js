@@ -2,24 +2,21 @@ const multer = require("multer");
 const { storage } = require("../config/cloudinaryConfig");
 const Book = require("../models/BookModels");
 
-// Konfigurasi Multer untuk menggunakan Cloudinary
 const upload = multer({ storage: storage });
 
-// Controller untuk mendapatkan semua buku
 const getAllBook = async (req, res) => {
   try {
-    const books = await Book.find(); // Fetch all books from the database
+    const books = await Book.find().sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       payload: books,
-      message: "Successfully getting book",
-    }); // Send the books as JSON response
+      message: "Successfully getting books",
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message }); // Handle errors
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Controller untuk menambahkan buku
 const postBook = async (req, res) => {
   upload.single("cover")(req, res, async (err) => {
     if (err) {
@@ -27,7 +24,7 @@ const postBook = async (req, res) => {
     }
 
     const { title, author, publisher, pages } = req.body;
-    const cover = req.file.path; // URL dari Cloudinary
+    const cover = req.file.path;
 
     try {
       const newBook = new Book({
@@ -38,19 +35,18 @@ const postBook = async (req, res) => {
         pages,
       });
 
-      const savedBook = await newBook.save(); // Save the new book to the database
+      const savedBook = await newBook.save();
       res.status(200).json({
         success: true,
         payload: savedBook,
         message: "Successfully added book",
-      }); // Send the saved book as JSON response with status code 201 (Created)
+      });
     } catch (error) {
-      res.status(400).json({ message: error.message }); // Handle validation errors
+      res.status(400).json({ message: error.message });
     }
   });
 };
 
-// Controller untuk mendapatkan buku berdasarkan ID
 const getBookById = async (req, res) => {
   const { id } = req.params;
 
@@ -71,49 +67,36 @@ const getBookById = async (req, res) => {
   }
 };
 
-// Controller untuk mengupdate buku
 const updateBook = async (req, res) => {
-  upload.single("cover")(req, res, async (err) => {
-    if (err) {
-      return res.status(400).json({ message: err.message });
+  const { id } = req.params;
+  const { title, author, publisher, pages, cover } = req.body;
+
+  try {
+    const updatedBook = await Book.findByIdAndUpdate(
+      id,
+      { title, author, publisher, pages, cover },
+      { new: true }
+    );
+
+    if (!updatedBook) {
+      return res.status(404).json({ message: "Book not found" });
     }
 
-    const { id } = req.params;
-    const { title, author, publisher, pages } = req.body;
-    let cover = req.body.cover; // Use cover from the body if no new file
-
-    if (req.file) {
-      cover = req.file.path; // URL from Cloudinary
-    }
-
-    try {
-      const updatedBook = await Book.findByIdAndUpdate(
-        id,
-        { title, author, publisher, pages, cover },
-        { new: true }
-      );
-
-      if (!updatedBook) {
-        return res.status(404).json({ message: "Book not found" });
-      }
-
-      res.status(200).json({
-        success: true,
-        payload: updatedBook,
-        message: "Successfully updated book",
-      });
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  });
+    res.status(200).json({
+      success: true,
+      payload: updatedBook,
+      message: "Successfully updated book",
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
-// Controller untuk menghapus buku
 const deleteBook = async (req, res) => {
   const bookId = req.params.id;
 
   try {
-    const deletedBook = await Book.findByIdAndDelete(bookId); // Find and delete book by ID in the database
+    const deletedBook = await Book.findByIdAndDelete(bookId);
     if (!deletedBook) {
       return res.status(404).json({ message: "Book not found" });
     }
@@ -121,9 +104,9 @@ const deleteBook = async (req, res) => {
       message: "Book deleted successfully",
       success: true,
       payload: null,
-    }); // Send success message
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message }); // Handle errors
+    res.status(500).json({ message: error.message });
   }
 };
 
