@@ -6,7 +6,7 @@ const upload = multer({ storage: storage });
 
 const getAllBook = async (req, res) => {
   try {
-    const books = await Book.find().sort({ createdAt: -1 });
+    const books = await Book.find().sort({ title: 1 });
     res.status(200).json({
       success: true,
       payload: books,
