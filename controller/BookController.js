@@ -80,10 +80,10 @@ const updateBook = async (req, res) => {
 
     const { id } = req.params;
     const { title, author, publisher, pages } = req.body;
-    let cover = req.body.cover; // Gunakan cover dari body jika tidak ada file baru
+    let cover = req.body.cover; // Use cover from the body if no new file
 
     if (req.file) {
-      cover = req.file.path; // URL dari Cloudinary
+      cover = req.file.path; // URL from Cloudinary
     }
 
     try {
